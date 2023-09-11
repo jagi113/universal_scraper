@@ -1,0 +1,6 @@
+/__pycache__
+/venv
+logs/
+.helper_folder/
+*.ini
+docker-compose.yaml
