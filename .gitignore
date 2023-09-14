@@ -4,3 +4,4 @@ logs/
 .helper_folder/
 *.ini
 docker-compose.yaml
+.testing_webpages.txt

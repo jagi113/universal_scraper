@@ -78,25 +78,68 @@ choices: dict = {
 
 
 def main() -> None:
+    # Basic page input
+
+    # mutliple pages check
     while True:
-        choice = input(
-            """
-Choose an order in which you want to present scraped books:
-- by title: "title"
-- by author: "author"
-- by price: "price"
-To search for a book: "search"
-To show details of a next book: "next"
-To quit: "quit"
->> """
-        )
-        if choice == "quit":
-            logger.debug("Terminating the program...")
+        single_page_input = input(
+            "Do you want to scrape elements only from one page? (Y/n): "
+        ).lower()
+        if single_page_input == "y":
+            url = input("What website do you want to scrape? ")
+            end_page = 0
             break
-        elif choice in choices:
-            choices[choice]()
+        elif single_page_input == "n":
+            url = input(
+                "What website do you want to scrape? (It is the webpage with numuerous elements you want to scrape usualy ending as '/p=' or '/page/' without the last number): "
+            )
+            end_page = int(
+                input("From how many pages do you want to scrape elements? ")
+            )
+            break
         else:
-            print("Unrecognized order! Try again!")
+            print("You must type Y for 'yes' or n for 'no'!")
+
+    with open("locators/pageLocator.py", "w") as file:
+        file.write(f'class PageLocator:\n    PAGE = "{url}"\n')
+
+    # getting preview
+    response = requests.get(url + "0" if end_page != 0 else url)
+    if response_check(response):
+        page = BeautifulSoup(response.content, "html.parser")
+        elementLocator = input("Provide html tags as locator for a tag of element: ")
+
+        url_property = property_check()
+        with open("locators/pageLocator.py", "a") as file:
+            file.write(
+                f'    ELEMENT = "{elementLocator}"\n    URL_PROPERTY = "{url_property}"'
+            )
+
+        elementUrl = page.select(elementLocator)
+        print(elementUrl[0])
+        url = elementUrl[0][url_property] if url_property else elementUrl[0]
+        print(url)
+
+
+#     while True:
+#         choice = input(
+#             """
+# Choose an order in which you want to present scraped books:
+# - by title: "title"
+# - by author: "author"
+# - by price: "price"
+# To search for a book: "search"
+# To show details of a next book: "next"
+# To quit: "quit"
+# >> """
+#         )
+#         if choice == "quit":
+#             logger.debug("Terminating the program...")
+#             break
+#         elif choice in choices:
+#             choices[choice]()
+#         else:
+#             print("Unrecognized order! Try again!")
 
 
 if __name__ == "__main__":
